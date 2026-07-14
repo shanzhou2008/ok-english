@@ -1,0 +1,26 @@
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tsconfigPaths from "vite-tsconfig-paths";
+
+// https://vite.dev/config/
+export default defineConfig({
+  base: '/ok-english/',
+  build: {
+    sourcemap: 'hidden',
+  },
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+    allowedHosts: 'all',
+  },
+  plugins: [
+    react({
+      babel: {
+        plugins: [
+          'react-dev-locator',
+        ],
+      },
+    }),
+    tsconfigPaths()
+  ],
+})
