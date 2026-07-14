@@ -20,6 +20,9 @@ const NODE_CENTERS = [
   { x: 70, y: 156 },
   { x: 205, y: 218 },
   { x: 100, y: 280 },
+  { x: 220, y: 342 },
+  { x: 85, y: 404 },
+  { x: 210, y: 466 },
 ];
 
 export default function GameLevels() {
