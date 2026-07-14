@@ -144,7 +144,53 @@ export function playPop() {
   playToneImmediate({ freq: 900, duration: 0.05, type: 'sine', volume: 0.12, delay: 0.03 });
 }
 
-// ==================== Word Pronunciation (Web Speech API with unified voice) ====================
+// ==================== Word Pronunciation (Web Speech API) ====================
+//
+// 音色版本配置：
+// ┌─────────────────────────────────────────────────────────────────────────────┐
+// │ 版本 1 (已弃用): rate=0.65, pitch=1.1, 优先 Google 语音                     │
+// │ 版本 2 (当前):   rate=0.75, pitch=1.3, 优先 Microsoft/Samantha 童趣语音      │
+// └─────────────────────────────────────────────────────────────────────────────┘
+
+// 当前使用的音色版本
+const VOICE_VERSION = 2;
+
+// 版本 1 配置 (已弃用，可回退)
+// const VOICE_CONFIG_V1 = {
+//   rate: 0.65,
+//   pitch: 1.1,
+//   volume: 1,
+// };
+
+// 版本 2 配置 (当前使用)
+const VOICE_CONFIG_V2 = {
+  rate: 0.75,
+  pitch: 1.3,
+  volume: 1,
+};
+
+const VOICE_CONFIG = VOICE_CONFIG_V2;
+
+function selectVoice(voices: SpeechSynthesisVoice[], version: number): SpeechSynthesisVoice | null {
+  if (version === 2) {
+    // 版本 2: 优先选择 Microsoft 或 Samantha 等童趣语音
+    return voices.find((v) => v.lang === 'en-US' && v.name.includes('Microsoft')) ||
+           voices.find((v) => v.lang === 'en-US' && v.name.includes('Samantha')) ||
+           voices.find((v) => v.lang === 'en-US' && v.name.includes('Zira')) ||
+           voices.find((v) => v.lang === 'en-US' && v.name.includes('Mark')) ||
+           voices.find((v) => v.lang === 'en-US' && v.localService) ||
+           voices.find((v) => v.lang.startsWith('en-US')) ||
+           voices.find((v) => v.lang.startsWith('en')) ||
+           null;
+  } else {
+    // 版本 1: 优先 Google 语音
+    return voices.find((v) => v.lang === 'en-US' && v.name.includes('Google')) ||
+           voices.find((v) => v.lang === 'en-US' && v.localService) ||
+           voices.find((v) => v.lang.startsWith('en-US')) ||
+           voices.find((v) => v.lang.startsWith('en')) ||
+           null;
+  }
+}
 
 export function speakWord(word: string) {
   if (!word) return;
@@ -158,15 +204,12 @@ export function speakWord(word: string) {
   try {
     const u = new SpeechSynthesisUtterance(word);
     u.lang = 'en-US';
-    u.rate = 0.65;
-    u.pitch = 1.1;
-    u.volume = 1;
+    u.rate = VOICE_CONFIG.rate;
+    u.pitch = VOICE_CONFIG.pitch;
+    u.volume = VOICE_CONFIG.volume;
 
     const voices = window.speechSynthesis.getVoices();
-    const enVoice = voices.find((v) => v.lang === 'en-US' && v.name.includes('Google')) ||
-                   voices.find((v) => v.lang === 'en-US' && v.localService) ||
-                   voices.find((v) => v.lang.startsWith('en-US')) ||
-                   voices.find((v) => v.lang.startsWith('en'));
+    const enVoice = selectVoice(voices, VOICE_VERSION);
     if (enVoice) {
       u.voice = enVoice;
     }
@@ -209,15 +252,12 @@ export function speakSequence(texts: { text: string; delay: number }[]): () => v
     const item = texts[currentIndex];
     const u = new SpeechSynthesisUtterance(item.text);
     u.lang = 'en-US';
-    u.rate = 0.65;
-    u.pitch = 1.1;
-    u.volume = 1;
+    u.rate = VOICE_CONFIG.rate;
+    u.pitch = VOICE_CONFIG.pitch;
+    u.volume = VOICE_CONFIG.volume;
 
     const voices = window.speechSynthesis.getVoices();
-    const enVoice = voices.find((v) => v.lang === 'en-US' && v.name.includes('Google')) ||
-                   voices.find((v) => v.lang === 'en-US' && v.localService) ||
-                   voices.find((v) => v.lang.startsWith('en-US')) ||
-                   voices.find((v) => v.lang.startsWith('en'));
+    const enVoice = selectVoice(voices, VOICE_VERSION);
     if (enVoice) {
       u.voice = enVoice;
     }
