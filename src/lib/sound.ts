@@ -173,6 +173,14 @@ function getWordAudioUrl(word: string): string {
   return `${BASE_URL}words/${fileName}.mp3`;
 }
 
+function getAdjustedVolume(word: string): number {
+  const trimmed = word.trim();
+  if (/^[A-Za-z]$/.test(trimmed)) {
+    return 1.8;
+  }
+  return 1.0;
+}
+
 function selectVoice(voices: SpeechSynthesisVoice[], version: number): SpeechSynthesisVoice | null {
   if (version === 3) {
     // 版本 3: 优先选择自然柔和的本地语音
@@ -217,7 +225,7 @@ export function speakWord(word: string) {
     const audio = new Audio(audioUrl);
     audio.crossOrigin = 'anonymous';
     audio.playbackRate = VOICE_VERSION === 4 ? 1.0 : 0.9;
-    audio.volume = 1;
+    audio.volume = getAdjustedVolume(word);
     currentAudio = audio;
     
     audio.play().catch(() => {
@@ -275,7 +283,7 @@ export function speakSequence(texts: { text: string; delay: number }[]): () => v
       const audio = new Audio(audioUrl);
       audio.crossOrigin = 'anonymous';
       audio.playbackRate = VOICE_VERSION === 4 ? 1.0 : 0.9;
-      audio.volume = 1;
+      audio.volume = getAdjustedVolume(item.text);
 
       audio.onended = () => {
         currentIndex++;
