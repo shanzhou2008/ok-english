@@ -375,7 +375,6 @@ export const songs: Song[] = [
     emoji: '🔔',
     color: '#FF6B6B',
     duration: 55,
-    audioUrl: 'songs/jingle-bells.mp3',
     lyrics: [
       { text: 'Jingle bells, jingle bells,', time: 3 },
       { text: 'jingle all the way!', time: 8 },
@@ -395,7 +394,6 @@ export const songs: Song[] = [
     emoji: '🌙',
     color: '#6366F1',
     duration: 60,
-    audioUrl: 'songs/silent-night.mp3',
     lyrics: [
       { text: 'Silent night, holy night!', time: 5 },
       { text: 'All is calm, all is bright.', time: 12 },
@@ -413,7 +411,6 @@ export const songs: Song[] = [
     emoji: '🎄',
     color: '#10B981',
     duration: 45,
-    audioUrl: 'songs/deck-the-halls.mp3',
     lyrics: [
       { text: "Deck the halls with boughs of holly,", time: 3 },
       { text: "Fa la la la la, la la la la.", time: 8 },
@@ -451,7 +448,6 @@ export const songs: Song[] = [
     emoji: '⭐',
     color: '#A855F7',
     duration: 40,
-    audioUrl: 'songs/little-star.mp3',
     lyrics: [
       { text: 'Twinkle, twinkle, little star,', time: 2 },
       { text: 'How I wonder what you are!', time: 7 },
@@ -467,7 +463,6 @@ export const songs: Song[] = [
     emoji: '🎂',
     color: '#F59E0B',
     duration: 35,
-    audioUrl: 'songs/happy-birthday.mp3',
     lyrics: [
       { text: 'Happy birthday to you!', time: 2 },
       { text: 'Happy birthday to you!', time: 7 },
@@ -483,7 +478,6 @@ export const songs: Song[] = [
     emoji: '😴',
     color: '#0EA5E9',
     duration: 30,
-    audioUrl: 'songs/good-night.mp3',
     lyrics: [
       { text: 'Good night, sleep tight,', time: 2 },
       { text: 'Don\'t let the bed bugs bite.', time: 7 },
@@ -499,7 +493,6 @@ export const songs: Song[] = [
     emoji: '☀️',
     color: '#FBBF24',
     duration: 40,
-    audioUrl: 'songs/sunny-day.mp3',
     lyrics: [
       { text: 'It\'s a sunny day,', time: 2 },
       { text: 'The sun is shining bright.', time: 7 },
@@ -538,7 +531,6 @@ export const songs: Song[] = [
     emoji: '🔢',
     color: '#8B5CF6',
     duration: 50,
-    audioUrl: 'songs/one-two-three.mp3',
     lyrics: [
       { text: 'One, two, three, four, five,', time: 2 },
       { text: 'Once I caught a fish alive.', time: 7 },
