@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useAuthStore } from './useAuthStore';
 
 interface PetStore {
   level: number;
@@ -9,14 +10,18 @@ interface PetStore {
   addExp: (amount: number) => void;
   addStars: (amount: number) => void;
   earnBadge: (badgeId: string) => void;
+  loadUserData: () => void;
 }
 
-const STORAGE_KEY = 'ok-english-pet';
+function getStorageKey(): string {
+  const currentUser = useAuthStore.getState().currentUser;
+  return `ok-english-pet-${currentUser?.id || 'default'}`;
+}
 
 function loadFromStorage(): Partial<PetStore> {
   if (typeof window === 'undefined') return {};
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(getStorageKey());
     if (!raw) return {};
     return JSON.parse(raw);
   } catch {
@@ -28,7 +33,7 @@ function saveToStorage(state: PetStore) {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(
-      STORAGE_KEY,
+      getStorageKey(),
       JSON.stringify({
         level: state.level,
         exp: state.exp,
@@ -50,6 +55,17 @@ export const usePetStore = create<PetStore>((set) => ({
   expToNext: persisted.expToNext ?? 100,
   stars: persisted.stars ?? 0,
   badges: persisted.badges ?? [],
+
+  loadUserData: () => {
+    const data = loadFromStorage();
+    set({
+      level: data.level ?? 1,
+      exp: data.exp ?? 0,
+      expToNext: data.expToNext ?? 100,
+      stars: data.stars ?? 0,
+      badges: data.badges ?? [],
+    });
+  },
 
   addExp: (amount) =>
     set((state) => {

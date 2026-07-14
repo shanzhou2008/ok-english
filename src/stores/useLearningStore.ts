@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useAuthStore } from './useAuthStore';
 
 interface WeeklyDataPoint {
   day: string;
@@ -17,6 +18,7 @@ interface LearningStore {
   completeSong: (id: string) => void;
   completeGame: (id: string, stars: number) => void;
   setSpeakingScore: (score: number) => void;
+  loadUserData: () => void;
 }
 
 const initialWeeklyData: WeeklyDataPoint[] = [
@@ -29,13 +31,15 @@ const initialWeeklyData: WeeklyDataPoint[] = [
   { day: '周日', minutes: 5 },
 ];
 
-// localStorage 持久化
-const STORAGE_KEY = 'ok-english-learning';
+function getStorageKey(): string {
+  const currentUser = useAuthStore.getState().currentUser;
+  return `ok-english-learning-${currentUser?.id || 'default'}`;
+}
 
 function loadFromStorage(): Partial<LearningStore> {
   if (typeof window === 'undefined') return {};
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(getStorageKey());
     if (!raw) return {};
     return JSON.parse(raw);
   } catch {
@@ -47,7 +51,7 @@ function saveToStorage(state: LearningStore) {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(
-      STORAGE_KEY,
+      getStorageKey(),
       JSON.stringify({
         completedSongs: state.completedSongs,
         completedGames: state.completedGames,
@@ -71,6 +75,17 @@ export const useLearningStore = create<LearningStore>((set) => ({
   gameStars: persisted.gameStars ?? {},
   speakingScore: persisted.speakingScore ?? 0,
   weeklyData: initialWeeklyData,
+
+  loadUserData: () => {
+    const data = loadFromStorage();
+    set({
+      todayMinutes: data.todayMinutes ?? 0,
+      completedSongs: data.completedSongs ?? [],
+      completedGames: data.completedGames ?? [],
+      gameStars: data.gameStars ?? {},
+      speakingScore: data.speakingScore ?? 0,
+    });
+  },
 
   addMinutes: (mins) =>
     set((state) => {

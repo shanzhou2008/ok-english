@@ -41,17 +41,13 @@ export default function SongPlayer() {
 
   const updateCurrentLyric = useCallback((time: number) => {
     if (!song) return;
-    let cumulative = 0;
-    for (let i = 0; i < song.lyrics.length; i++) {
-      cumulative += song.lyrics[i].duration;
-      if (cumulative > time) {
+    for (let i = song.lyrics.length - 1; i >= 0; i--) {
+      if (time >= song.lyrics[i].time) {
         setCurrentLyric(i);
         return;
       }
     }
-    if (song.lyrics.length > 0) {
-      setCurrentLyric(song.lyrics.length - 1);
-    }
+    setCurrentLyric(0);
   }, [song]);
 
   const handleTimeUpdate = useCallback(() => {
