@@ -168,6 +168,8 @@ const VOICE_CONFIG = {
 // MP3 音频播放器（优先使用，音色更自然）
 let currentAudio: HTMLAudioElement | null = null;
 let audioSource: MediaElementAudioSourceNode | null = null;
+let playQueue: string[] = [];
+let isPlaying = false;
 
 function getWordAudioUrl(word: string): string {
   const fileName = word.trim().toLowerCase().replace(/\s+/g, '-');
@@ -215,6 +217,20 @@ export function speakWord(word: string) {
   if (!word) return;
   unlockAudio();
 
+  playQueue.push(word);
+  if (!isPlaying) {
+    processPlayQueue();
+  }
+}
+
+function processPlayQueue() {
+  if (playQueue.length === 0) {
+    isPlaying = false;
+    return;
+  }
+
+  isPlaying = true;
+  const word = playQueue.shift()!;
   const audioUrl = getWordAudioUrl(word);
 
   if (VOICE_VERSION >= 3 && audioUrl) {
@@ -246,6 +262,7 @@ export function speakWord(word: string) {
     
     audio.play().catch(() => {
       speakWithTTS(word);
+      processPlayQueue();
     });
     
     audio.onended = () => {
@@ -254,6 +271,7 @@ export function speakWord(word: string) {
         audioSource.disconnect();
         audioSource = null;
       }
+      processPlayQueue();
     };
     
     audio.onerror = () => {
@@ -262,12 +280,14 @@ export function speakWord(word: string) {
         audioSource = null;
       }
       speakWithTTS(word);
+      processPlayQueue();
     };
     
     return;
   }
 
   speakWithTTS(word);
+  processPlayQueue();
 }
 
 function speakWithTTS(word: string) {
@@ -401,9 +421,15 @@ export function speakSequence(texts: { text: string; delay: number }[]): () => v
 }
 
 export function stopSpeak() {
+  playQueue = [];
+  isPlaying = false;
   if (currentAudio) {
     currentAudio.pause();
     currentAudio = null;
+  }
+  if (audioSource) {
+    audioSource.disconnect();
+    audioSource = null;
   }
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     try {
