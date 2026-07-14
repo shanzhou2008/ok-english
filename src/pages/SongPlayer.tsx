@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, SkipForward, SkipBack, ChevronLeft, Music, Volume2, VolumeX, RotateCcw } from 'lucide-react';
-import { songs } from '@/data/songs';
+import { songs, getAudioUrl } from '@/data/songs';
 import { useLearningStore } from '@/stores/useLearningStore';
 import { usePetStore } from '@/stores/usePetStore';
 import { unlockAudio } from '@/lib/sound';
@@ -203,7 +203,7 @@ export default function SongPlayer() {
       {song.audioUrl && (
         <audio
           ref={audioRef}
-          src={song.audioUrl}
+          src={song.audioUrl ? getAudioUrl(song.audioUrl) : undefined}
           onTimeUpdate={handleTimeUpdate}
           onLoadedMetadata={handleLoadedMetadata}
           onEnded={handleEnded}
