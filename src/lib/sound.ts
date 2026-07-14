@@ -167,6 +167,7 @@ const VOICE_CONFIG = {
 
 // MP3 音频播放器（优先使用，音色更自然）
 let currentAudio: HTMLAudioElement | null = null;
+let audioSource: MediaElementAudioSourceNode | null = null;
 
 function getWordAudioUrl(word: string): string {
   const fileName = word.trim().toLowerCase().replace(/\s+/g, '-');
@@ -216,17 +217,32 @@ export function speakWord(word: string) {
 
   const audioUrl = getWordAudioUrl(word);
 
-  // 版本 4: 全部使用有道美式女声 MP3 音频
   if (VOICE_VERSION >= 3 && audioUrl) {
     if (currentAudio) {
       currentAudio.pause();
       currentAudio = null;
     }
+    if (audioSource) {
+      audioSource.disconnect();
+      audioSource = null;
+    }
+    
     const audio = new Audio(audioUrl);
     audio.crossOrigin = 'anonymous';
     audio.playbackRate = VOICE_VERSION === 4 ? 1.0 : 0.9;
-    audio.volume = getAdjustedVolume(word);
+    audio.volume = 1;
     currentAudio = audio;
+    
+    const ctx = getCtx();
+    const volume = getAdjustedVolume(word);
+    
+    if (ctx && volume > 1) {
+      audioSource = ctx.createMediaElementSource(audio);
+      const gainNode = ctx.createGain();
+      gainNode.gain.value = volume;
+      audioSource.connect(gainNode);
+      gainNode.connect(ctx.destination);
+    }
     
     audio.play().catch(() => {
       speakWithTTS(word);
@@ -234,9 +250,17 @@ export function speakWord(word: string) {
     
     audio.onended = () => {
       if (currentAudio === audio) currentAudio = null;
+      if (audioSource) {
+        audioSource.disconnect();
+        audioSource = null;
+      }
     };
     
     audio.onerror = () => {
+      if (audioSource) {
+        audioSource.disconnect();
+        audioSource = null;
+      }
       speakWithTTS(word);
     };
     
@@ -283,9 +307,25 @@ export function speakSequence(texts: { text: string; delay: number }[]): () => v
       const audio = new Audio(audioUrl);
       audio.crossOrigin = 'anonymous';
       audio.playbackRate = VOICE_VERSION === 4 ? 1.0 : 0.9;
-      audio.volume = getAdjustedVolume(item.text);
+      audio.volume = 1;
+
+      const ctx = getCtx();
+      const volume = getAdjustedVolume(item.text);
+      let seqAudioSource: MediaElementAudioSourceNode | null = null;
+      
+      if (ctx && volume > 1) {
+        seqAudioSource = ctx.createMediaElementSource(audio);
+        const gainNode = ctx.createGain();
+        gainNode.gain.value = volume;
+        seqAudioSource.connect(gainNode);
+        gainNode.connect(ctx.destination);
+      }
 
       audio.onended = () => {
+        if (seqAudioSource) {
+          seqAudioSource.disconnect();
+          seqAudioSource = null;
+        }
         currentIndex++;
         if (currentIndex < texts.length && !cancelled) {
           window.setTimeout(playNext, item.delay || 1200);
@@ -293,10 +333,18 @@ export function speakSequence(texts: { text: string; delay: number }[]): () => v
       };
 
       audio.onerror = () => {
+        if (seqAudioSource) {
+          seqAudioSource.disconnect();
+          seqAudioSource = null;
+        }
         playNextWithTTS(item.text, item.delay);
       };
 
       audio.play().catch(() => {
+        if (seqAudioSource) {
+          seqAudioSource.disconnect();
+          seqAudioSource = null;
+        }
         playNextWithTTS(item.text, item.delay);
       });
       return;
