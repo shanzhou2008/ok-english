@@ -16,6 +16,7 @@ import Animals from "@/pages/Animals";
 import AuthPage from "@/pages/AuthPage";
 import { unlockAudio } from "@/lib/sound";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { useSongStore } from "@/stores/useSongStore";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const currentUser = useAuthStore((s) => s.currentUser);
@@ -23,6 +24,10 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const currentUser = useAuthStore((s) => s.currentUser);
+  const loadFavorites = useSongStore((s) => s.loadFavorites);
+  const saveFavorites = useSongStore((s) => s.saveFavorites);
+
   useEffect(() => {
     const handleFirstInteraction = () => {
       unlockAudio();
@@ -41,6 +46,25 @@ export default function App() {
       document.removeEventListener("keydown", handleFirstInteraction);
     };
   }, []);
+
+  useEffect(() => {
+    if (currentUser) {
+      loadFavorites(currentUser.id);
+    }
+  }, [currentUser, loadFavorites]);
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (currentUser) {
+        saveFavorites(currentUser.id);
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [currentUser, saveFavorites]);
 
   return (
     <Router>

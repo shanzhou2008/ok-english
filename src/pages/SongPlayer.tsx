@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, SkipForward, SkipBack, ChevronLeft, Music, Volume2, VolumeX, RotateCcw } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, ChevronLeft, Music, Volume2, VolumeX, RotateCcw, Heart } from 'lucide-react';
 import { songs, getAudioUrl } from '@/data/songs';
 import { useLearningStore } from '@/stores/useLearningStore';
 import { usePetStore } from '@/stores/usePetStore';
+import { useSongStore } from '@/stores/useSongStore';
 import { unlockAudio } from '@/lib/sound';
 
 const formatTime = (sec: number) => {
@@ -19,6 +20,7 @@ export default function SongPlayer() {
   const song = songs.find((s) => s.id === id);
   const completeSong = useLearningStore((s) => s.completeSong);
   const addStars = usePetStore((s) => s.addStars);
+  const { toggleFavorite, isFavorite } = useSongStore();
 
   const [playing, setPlaying] = useState(false);
   const [currentLyric, setCurrentLyric] = useState(0);
@@ -252,13 +254,23 @@ export default function SongPlayer() {
         <h1 className="flex-1 truncate text-center text-lg font-bold text-[#1A1A2E]">
           {song.title}
         </h1>
-        <button onClick={() => setMuted(!muted)} className="p-2 rounded-full bg-white/80 shadow-sm">
-          {muted ? (
-            <VolumeX size={20} className="text-[#6B7280]" />
-          ) : (
-            <Volume2 size={20} className="text-[#1A1A2E]" />
-          )}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => toggleFavorite(song.id)}
+            className={`p-2 rounded-full bg-white/80 shadow-sm transition-all ${
+              isFavorite(song.id) ? 'text-red-500' : 'text-gray-400'
+            }`}
+          >
+            <Heart size={20} className={isFavorite(song.id) ? 'fill-current' : ''} />
+          </button>
+          <button onClick={() => setMuted(!muted)} className="p-2 rounded-full bg-white/80 shadow-sm">
+            {muted ? (
+              <VolumeX size={20} className="text-[#6B7280]" />
+            ) : (
+              <Volume2 size={20} className="text-[#1A1A2E]" />
+            )}
+          </button>
+        </div>
       </header>
 
       <div className="relative z-10 flex flex-1 flex-col items-center px-6 pt-6">
