@@ -1,3 +1,5 @@
+const BASE_URL = import.meta.env.BASE_URL || '/';
+
 export interface SongLyric {
   text: string;
   duration: number;
@@ -33,7 +35,7 @@ export const songs: Song[] = [
     emoji: '⭐',
     color: '#7C5CFC',
     duration: 55,
-    audioUrl: '/songs/twinkle-twinkle.mp3',
+    audioUrl: '${BASE_URL}songs/twinkle-twinkle.mp3',
     lyrics: [
       { text: 'Twinkle, twinkle, little star,', duration: 5 },
       { text: 'How I wonder what you are!', duration: 5 },
@@ -51,7 +53,7 @@ export const songs: Song[] = [
     emoji: '🔤',
     color: '#00C9A7',
     duration: 50,
-    audioUrl: '/songs/abc-song.mp3',
+    audioUrl: '${BASE_URL}songs/abc-song.mp3',
     lyrics: [
       { text: 'A, B, C, D, E, F, G,', duration: 4 },
       { text: 'H, I, J, K, L, M, N, O, P,', duration: 5 },
@@ -69,7 +71,7 @@ export const songs: Song[] = [
     emoji: '🧒',
     color: '#FF6B9D',
     duration: 43,
-    audioUrl: '/songs/head-shoulders.mp3',
+    audioUrl: '${BASE_URL}songs/head-shoulders.mp3',
     lyrics: [
       { text: 'Head, shoulders, knees and toes,', duration: 5 },
       { text: 'knees and toes!', duration: 3 },
@@ -88,7 +90,7 @@ export const songs: Song[] = [
     emoji: '🚌',
     color: '#FFA94D',
     duration: 55,
-    audioUrl: '/songs/wheels-on-the-bus.mp3',
+    audioUrl: '${BASE_URL}songs/wheels-on-the-bus.mp3',
     lyrics: [
       { text: 'The wheels on the bus go round and round,', duration: 6 },
       { text: 'round and round, round and round.', duration: 6 },
@@ -108,7 +110,7 @@ export const songs: Song[] = [
     emoji: '😊',
     color: '#FF6B9D',
     duration: 57,
-    audioUrl: '/songs/if-youre-happy.mp3',
+    audioUrl: '${BASE_URL}songs/if-youre-happy.mp3',
     lyrics: [
       { text: "If you're happy and you know it, clap your hands!", duration: 7 },
       { text: '(clap clap)', duration: 3 },
@@ -128,7 +130,7 @@ export const songs: Song[] = [
     emoji: '🐄',
     color: '#22C55E',
     duration: 77,
-    audioUrl: '/songs/old-macdonald.mp3',
+    audioUrl: '${BASE_URL}songs/old-macdonald.mp3',
     lyrics: [
       { text: 'Old MacDonald had a farm,', duration: 5 },
       { text: 'E-I-E-I-O!', duration: 5 },
@@ -150,7 +152,7 @@ export const songs: Song[] = [
     emoji: '🦆',
     color: '#3B82F6',
     duration: 102,
-    audioUrl: '/songs/five-little-ducks.mp3',
+    audioUrl: '${BASE_URL}songs/five-little-ducks.mp3',
     lyrics: [
       { text: 'Five little ducks went swimming one day,', duration: 7 },
       { text: 'Over the hill and far away.', duration: 7 },
@@ -170,7 +172,7 @@ export const songs: Song[] = [
     emoji: '🚣',
     color: '#06B6D4',
     duration: 28,
-    audioUrl: '/songs/row-row-row.mp3',
+    audioUrl: '${BASE_URL}songs/row-row-row.mp3',
     lyrics: [
       { text: 'Row, row, row your boat,', duration: 4 },
       { text: 'Gently down the stream.', duration: 4 },
@@ -186,7 +188,7 @@ export const songs: Song[] = [
     emoji: '🌈',
     color: '#7C5CFC',
     duration: 53,
-    audioUrl: '/songs/rainbow-song.mp3',
+    audioUrl: '${BASE_URL}songs/rainbow-song.mp3',
     lyrics: [
       { text: 'Red and yellow and pink and green,', duration: 5 },
       { text: 'Purple and orange and blue.', duration: 5 },
@@ -206,7 +208,7 @@ export const songs: Song[] = [
     emoji: '🐑',
     color: '#F59E0B',
     duration: 96,
-    audioUrl: '/songs/mary-little-lamb.mp3',
+    audioUrl: '${BASE_URL}songs/mary-little-lamb.mp3',
     lyrics: [
       { text: 'Mary had a little lamb,', duration: 5 },
       { text: 'little lamb, little lamb.', duration: 5 },
@@ -226,7 +228,7 @@ export const songs: Song[] = [
     emoji: '🐏',
     color: '#6B7280',
     duration: 39,
-    audioUrl: '/songs/baa-baa-black-sheep.mp3',
+    audioUrl: '${BASE_URL}songs/baa-baa-black-sheep.mp3',
     lyrics: [
       { text: 'Baa, baa, black sheep,', duration: 4 },
       { text: 'have you any wool?', duration: 4 },
@@ -246,7 +248,7 @@ export const songs: Song[] = [
     emoji: '🥚',
     color: '#F97316',
     duration: 38,
-    audioUrl: '/songs/humpty-dumpty.mp3',
+    audioUrl: '${BASE_URL}songs/humpty-dumpty.mp3',
     lyrics: [
       { text: 'Humpty Dumpty sat on a wall,', duration: 5 },
       { text: 'Humpty Dumpty had a great fall.', duration: 5 },
@@ -262,7 +264,7 @@ export const songs: Song[] = [
     emoji: '⛰️',
     color: '#8B5CF6',
     duration: 28,
-    audioUrl: '/songs/jack-and-jill.mp3',
+    audioUrl: '${BASE_URL}songs/jack-and-jill.mp3',
     lyrics: [
       { text: 'Jack and Jill went up the hill', duration: 4 },
       { text: 'to fetch a pail of water.', duration: 4 },
@@ -278,7 +280,7 @@ export const songs: Song[] = [
     emoji: '🐭',
     color: '#EC4899',
     duration: 36,
-    audioUrl: '/songs/hickory-dickory-dock.mp3',
+    audioUrl: '${BASE_URL}songs/hickory-dickory-dock.mp3',
     lyrics: [
       { text: 'Hickory, dickory, dock,', duration: 4 },
       { text: 'the mouse ran up the clock.', duration: 4 },
@@ -295,7 +297,7 @@ export const songs: Song[] = [
     emoji: '🐶',
     color: '#F59E0B',
     duration: 60,
-    audioUrl: '/songs/bingo.mp3',
+    audioUrl: '${BASE_URL}songs/bingo.mp3',
     lyrics: [
       { text: 'There was a farmer who had a dog,', duration: 5 },
       { text: 'And Bingo was his name-o.', duration: 5 },
@@ -313,7 +315,7 @@ export const songs: Song[] = [
     emoji: '💃',
     color: '#FF6B9D',
     duration: 55,
-    audioUrl: '/songs/skip-to-my-lou.mp3',
+    audioUrl: '${BASE_URL}songs/skip-to-my-lou.mp3',
     lyrics: [
       { text: 'Skip, skip, skip to my Lou,', duration: 5 },
       { text: 'Skip, skip, skip to my Lou,', duration: 5 },
@@ -329,7 +331,7 @@ export const songs: Song[] = [
     emoji: '🚂',
     color: '#3B82F6',
     duration: 45,
-    audioUrl: '/songs/down-by-station.mp3',
+    audioUrl: '${BASE_URL}songs/down-by-station.mp3',
     lyrics: [
       { text: 'Down by the station,', duration: 4 },
       { text: 'early in the morning,', duration: 4 },
@@ -349,7 +351,7 @@ export const songs: Song[] = [
     emoji: '🎵',
     color: '#8B5CF6',
     duration: 40,
-    audioUrl: '/songs/pop-goes-weasel.mp3',
+    audioUrl: '${BASE_URL}songs/pop-goes-weasel.mp3',
     lyrics: [
       { text: 'All around the cobbler\'s bench,', duration: 5 },
       { text: 'the monkey chased the weasel.', duration: 5 },

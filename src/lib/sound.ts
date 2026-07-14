@@ -1,3 +1,5 @@
+const BASE_URL = import.meta.env.BASE_URL || '/';
+
 // Web Audio API 音效工具 - 不需要音频文件，用代码合成音效
 let audioCtx: AudioContext | null = null;
 let voicesReady = false;
@@ -149,7 +151,7 @@ let currentAudio: HTMLAudioElement | null = null;
 function getWordAudioUrl(word: string): string | null {
   if (!word) return null;
   const fileName = word.trim().toLowerCase().replace(/\s+/g, '-');
-  return `/words/${fileName}.mp3`;
+  return `${BASE_URL}words/${fileName}.mp3`;
 }
 
 export function speakWord(word: string) {
