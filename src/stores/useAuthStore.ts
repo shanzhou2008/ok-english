@@ -24,7 +24,8 @@ function loadUsers(): User[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
@@ -63,14 +64,15 @@ function saveCurrentUser(user: User | null) {
   }
 }
 
-const users = loadUsers();
-const currentUser = loadCurrentUser();
+const initialUsers = loadUsers();
+const initialCurrentUser = loadCurrentUser();
 
-export const useAuthStore = create<AuthStore>((set) => ({
-  currentUser,
-  users,
+export const useAuthStore = create<AuthStore>((set, get) => ({
+  currentUser: initialCurrentUser,
+  users: initialUsers,
 
   login: (username, password) => {
+    const { users } = get();
     const user = users.find((u) => u.username === username && u.password === password);
     if (user) {
       saveCurrentUser(user);
@@ -81,6 +83,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   signup: (username, password) => {
+    const { users } = get();
     if (users.find((u) => u.username === username)) {
       return false;
     }
@@ -103,6 +106,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   hasAccount: (username) => {
+    const { users } = get();
     return users.some((u) => u.username === username);
   },
 }));

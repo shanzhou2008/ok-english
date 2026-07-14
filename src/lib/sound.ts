@@ -176,7 +176,7 @@ function getWordAudioUrl(word: string): string {
 function getAdjustedVolume(word: string): number {
   const trimmed = word.trim();
   if (/^[A-Za-z]$/.test(trimmed)) {
-    return 1.8;
+    return 2.5;
   }
   return 1.0;
 }
