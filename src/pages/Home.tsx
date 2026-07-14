@@ -23,7 +23,7 @@ const AGE_OPTIONS: { label: string; value: 1 | 2 | 3 }[] = [
 ];
 
 const QUICK_ENTRIES = [
-  { label: '儿歌动画', icon: Music, bg: '#7C5CFC', to: '/songs' },
+  { label: '儿歌', icon: Music, bg: '#7C5CFC', to: '/songs' },
   { label: '互动游戏', icon: Gamepad2, bg: '#00C9A7', to: '/games' },
   { label: '口语跟读', icon: Mic, bg: '#FF6B9D', to: '/speaking' },
   { label: '宠物岛', icon: Rabbit, bg: '#FFA94D', to: '/pet' },

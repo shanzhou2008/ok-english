@@ -69,9 +69,11 @@ export default function Songs() {
                 <div className="min-w-0 flex-1" onClick={() => navigate(`/songs/${song.id}`)}>
                   <p className="truncate font-bold text-[#1A1A2E]">{song.title}</p>
                   <p className="truncate text-sm text-[#6B7280]">{song.titleCn}</p>
-                  <span className="mt-1 inline-block rounded-full bg-[#7C5CFC]/10 px-2 py-0.5 text-xs font-semibold text-[#7C5CFC]">
-                    {song.category}
-                  </span>
+                  {song.audioUrl && (
+                    <span className="mt-1 inline-block rounded-full bg-[#7C5CFC]/10 px-2 py-0.5 text-xs font-semibold text-[#7C5CFC]">
+                      {song.category}
+                    </span>
+                  )}
                 </div>
                 <div className="flex shrink-0 flex-col items-center gap-1.5">
                   <span className="flex items-center gap-0.5 text-xs text-[#6B7280]">
