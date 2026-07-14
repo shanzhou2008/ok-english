@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "@/pages/Home";
 import Songs from "@/pages/Songs";
 import SongPlayer from "@/pages/SongPlayer";
