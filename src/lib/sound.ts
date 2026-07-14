@@ -148,31 +148,55 @@ export function playPop() {
 //
 // 音色版本配置：
 // ┌─────────────────────────────────────────────────────────────────────────────┐
-// │ 版本 1 (已弃用): rate=0.65, pitch=1.1, 优先 Google 语音                     │
-// │ 版本 2 (当前):   rate=0.75, pitch=1.3, 优先 Microsoft/Samantha 童趣语音      │
+// │ 版本 1: rate=0.65, pitch=1.1, 优先 Google 语音                     │
+// │ 版本 2: rate=0.75, pitch=1.3, 优先 Microsoft/Samantha 童趣语音      │
+// │ 版本 3 (当前): 优先使用 MP3 音频文件，更自然柔和，Web Speech API 作为备选    │
 // └─────────────────────────────────────────────────────────────────────────────┘
 
 // 当前使用的音色版本
-const VOICE_VERSION = 2;
+const VOICE_VERSION = 3;
 
-// 版本 1 配置 (已弃用，可回退)
-// const VOICE_CONFIG_V1 = {
-//   rate: 0.65,
-//   pitch: 1.1,
-//   volume: 1,
-// };
+// 版本 1 配置
+const VOICE_CONFIG_V1 = {
+  rate: 0.65,
+  pitch: 1.1,
+  volume: 1,
+};
 
-// 版本 2 配置 (当前使用)
+// 版本 2 配置
 const VOICE_CONFIG_V2 = {
   rate: 0.75,
   pitch: 1.3,
   volume: 1,
 };
 
-const VOICE_CONFIG = VOICE_CONFIG_V2;
+// 版本 3 配置 (当前使用) - 更自然柔和
+const VOICE_CONFIG_V3 = {
+  rate: 0.85,
+  pitch: 1.0,
+  volume: 1,
+};
+
+const VOICE_CONFIG = VOICE_CONFIG_V3;
+
+// MP3 音频播放器（优先使用，音色更自然）
+let currentAudio: HTMLAudioElement | null = null;
+
+function getWordAudioUrl(word: string): string {
+  const fileName = word.trim().toLowerCase().replace(/\s+/g, '-');
+  return `${BASE_URL}words/${fileName}.mp3`;
+}
 
 function selectVoice(voices: SpeechSynthesisVoice[], version: number): SpeechSynthesisVoice | null {
-  if (version === 2) {
+  if (version === 3) {
+    // 版本 3: 优先选择自然柔和的本地语音
+    return voices.find((v) => v.lang === 'en-US' && v.localService) ||
+           voices.find((v) => v.lang === 'en-US' && v.name.includes('Samantha')) ||
+           voices.find((v) => v.lang === 'en-US' && v.name.includes('Alex')) ||
+           voices.find((v) => v.lang.startsWith('en-US')) ||
+           voices.find((v) => v.lang.startsWith('en')) ||
+           null;
+  } else if (version === 2) {
     // 版本 2: 优先选择 Microsoft 或 Samantha 等童趣语音
     return voices.find((v) => v.lang === 'en-US' && v.name.includes('Microsoft')) ||
            voices.find((v) => v.lang === 'en-US' && v.name.includes('Samantha')) ||
@@ -196,11 +220,44 @@ export function speakWord(word: string) {
   if (!word) return;
   unlockAudio();
 
-  if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-    fallbackToAudio(word);
+  const audioUrl = getWordAudioUrl(word);
+
+  // 版本 3: 优先尝试 MP3 音频文件（音色更自然）
+  if (VOICE_VERSION === 3 && audioUrl) {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio = null;
+    }
+    const audio = new Audio(audioUrl);
+    audio.crossOrigin = 'anonymous';
+    audio.playbackRate = 0.9;  // 稍慢一点，让小朋友听清楚
+    audio.volume = 1;
+    currentAudio = audio;
+    
+    audio.play().catch(() => {
+      // MP3 播放失败，回退到 Web Speech API
+      speakWithTTS(word);
+    });
+    
+    audio.onended = () => {
+      if (currentAudio === audio) currentAudio = null;
+    };
+    
+    audio.onerror = () => {
+      // MP3 加载失败，回退到 Web Speech API
+      speakWithTTS(word);
+    };
+    
     return;
   }
 
+  // 其他版本直接使用 Web Speech API
+  speakWithTTS(word);
+}
+
+function speakWithTTS(word: string) {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  
   try {
     const u = new SpeechSynthesisUtterance(word);
     u.lang = 'en-US';
@@ -217,30 +274,8 @@ export function speakWord(word: string) {
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(u);
   } catch {
-    fallbackToAudio(word);
+    // ignore
   }
-}
-
-function fallbackToAudio(word: string) {
-  if (!word) return;
-  let currentAudio: HTMLAudioElement | null = null;
-  
-  const fileName = word.trim().toLowerCase().replace(/\s+/g, '-');
-  const audioUrl = `${BASE_URL}words/${fileName}.mp3`;
-  
-  if (currentAudio) {
-    currentAudio.pause();
-    currentAudio = null;
-  }
-  const audio = new Audio(audioUrl);
-  audio.crossOrigin = 'anonymous';
-  audio.playbackRate = 0.85;
-  audio.volume = 1;
-  currentAudio = audio;
-  audio.play().catch(() => {});
-  audio.onended = () => {
-    if (currentAudio === audio) currentAudio = null;
-  };
 }
 
 export function speakSequence(texts: { text: string; delay: number }[]): () => void {
@@ -250,7 +285,39 @@ export function speakSequence(texts: { text: string; delay: number }[]): () => v
   function playNext() {
     if (cancelled || currentIndex >= texts.length) return;
     const item = texts[currentIndex];
-    const u = new SpeechSynthesisUtterance(item.text);
+
+    // 版本 3: 优先尝试 MP3
+    if (VOICE_VERSION === 3) {
+      const audioUrl = getWordAudioUrl(item.text);
+      const audio = new Audio(audioUrl);
+      audio.crossOrigin = 'anonymous';
+      audio.playbackRate = 0.9;
+      audio.volume = 1;
+
+      audio.onended = () => {
+        currentIndex++;
+        if (currentIndex < texts.length && !cancelled) {
+          window.setTimeout(playNext, item.delay || 1200);
+        }
+      };
+
+      audio.onerror = () => {
+        // MP3 失败，用 TTS
+        playNextWithTTS(item.text, item.delay);
+      };
+
+      audio.play().catch(() => {
+        playNextWithTTS(item.text, item.delay);
+      });
+      return;
+    }
+
+    // 其他版本使用 TTS
+    playNextWithTTS(item.text, item.delay);
+  }
+
+  function playNextWithTTS(text: string, delay: number) {
+    const u = new SpeechSynthesisUtterance(text);
     u.lang = 'en-US';
     u.rate = VOICE_CONFIG.rate;
     u.pitch = VOICE_CONFIG.pitch;
@@ -265,13 +332,13 @@ export function speakSequence(texts: { text: string; delay: number }[]): () => v
     u.onend = () => {
       currentIndex++;
       if (currentIndex < texts.length && !cancelled) {
-        window.setTimeout(playNext, item.delay || 1000);
+        window.setTimeout(playNext, delay || 1200);
       }
     };
     u.onerror = () => {
       currentIndex++;
       if (currentIndex < texts.length && !cancelled) {
-        window.setTimeout(playNext, item.delay || 1000);
+        window.setTimeout(playNext, delay || 1200);
       }
     };
 
@@ -286,6 +353,10 @@ export function speakSequence(texts: { text: string; delay: number }[]): () => v
 
   return () => {
     cancelled = true;
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio = null;
+    }
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
@@ -293,6 +364,10 @@ export function speakSequence(texts: { text: string; delay: number }[]): () => v
 }
 
 export function stopSpeak() {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+  }
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     try {
       window.speechSynthesis.cancel();
