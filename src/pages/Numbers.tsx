@@ -27,13 +27,39 @@ const numbers = [
   { num: 20, word: 'Twenty', emoji: '🎉', color: '#7C5CFC' },
 ];
 
+const COUNT_OPTIONS = [
+  { label: '1-5', count: 5 },
+  { label: '1-10', count: 10 },
+  { label: '1-15', count: 15 },
+  { label: '1-20', count: 20 },
+];
+
 export default function Numbers() {
   const navigate = useNavigate();
   const [activeNum, setActiveNum] = useState<number | null>(null);
+  const [countTo, setCountTo] = useState(5);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const handleCardClick = (num: number, word: string) => {
     setActiveNum(num);
     speakWord(word);
+  };
+
+  const handleCount = () => {
+    setIsPlaying(true);
+    const items = numbers.slice(0, countTo);
+    items.forEach((item, i) => {
+      setTimeout(() => {
+        speakWord(item.word);
+        setActiveNum(item.num);
+        if (i === items.length - 1) {
+          setTimeout(() => {
+            setIsPlaying(false);
+            setActiveNum(null);
+          }, 1500);
+        }
+      }, i * 1500);
+    });
   };
 
   return (
@@ -61,12 +87,17 @@ export default function Numbers() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={`flex flex-col items-center justify-center p-3 rounded-2xl bg-white shadow-lg transition-all ${
-                activeNum === item.num ? 'ring-4 ring-[#7C5CFC]' : ''
+                activeNum === item.num ? 'ring-4 ring-[#7C5CFC] scale-105' : ''
               }`}
             >
-              <span className="text-3xl font-black" style={{ color: item.color }}>
+              <motion.span
+                className="text-3xl font-black"
+                style={{ color: item.color }}
+                animate={activeNum === item.num ? { scale: [1, 1.2, 1] } : {}}
+                transition={{ duration: 0.5 }}
+              >
                 {item.num}
-              </span>
+              </motion.span>
               <span className="text-xl mt-1">{item.emoji}</span>
               <span className="text-xs font-bold text-[#6B7280] mt-1">
                 {item.word}
@@ -82,16 +113,32 @@ export default function Numbers() {
         >
           <p className="text-sm opacity-90">试试数数！</p>
           <p className="text-2xl font-black mt-2">1, 2, 3...</p>
+          
+          <div className="mt-4 flex justify-center gap-2">
+            {COUNT_OPTIONS.map((opt) => (
+              <motion.button
+                key={opt.label}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setCountTo(opt.count)}
+                className={`px-4 py-1.5 rounded-full text-sm font-bold transition-all ${
+                  countTo === opt.count
+                    ? 'bg-white text-[#7C5CFC]'
+                    : 'bg-white/20 text-white'
+                }`}
+              >
+                {opt.label}
+              </motion.button>
+            ))}
+          </div>
+          
           <button
-            onClick={() => {
-              numbers.slice(0, 5).forEach((item, i) => {
-                setTimeout(() => speakWord(item.word), i * 800);
-              });
-            }}
-            className="mt-4 px-6 py-2 rounded-full bg-white/20 font-bold"
+            onClick={handleCount}
+            disabled={isPlaying}
+            className="mt-4 px-6 py-2 rounded-full bg-white/20 font-bold flex items-center justify-center mx-auto gap-2 disabled:opacity-50"
           >
-            <Volume2 size={20} className="inline mr-2" />
-            播放1-5
+            <Volume2 size={20} />
+            {isPlaying ? '播放中...' : `播放1-${countTo}`}
           </button>
         </motion.div>
       </div>

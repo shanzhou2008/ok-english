@@ -144,57 +144,27 @@ export function playPop() {
   playToneImmediate({ freq: 900, duration: 0.05, type: 'sine', volume: 0.12, delay: 0.03 });
 }
 
-// ==================== Word Pronunciation (MP3 + SpeechSynthesis fallback) ====================
-
-let currentAudio: HTMLAudioElement | null = null;
-
-function getWordAudioUrl(word: string): string | null {
-  if (!word) return null;
-  const fileName = word.trim().toLowerCase().replace(/\s+/g, '-');
-  return `${BASE_URL}words/${fileName}.mp3`;
-}
+// ==================== Word Pronunciation (Web Speech API with unified voice) ====================
 
 export function speakWord(word: string) {
   if (!word) return;
   unlockAudio();
 
-  const audioUrl = getWordAudioUrl(word);
-
-  if (audioUrl) {
-    if (currentAudio) {
-      currentAudio.pause();
-      currentAudio = null;
-    }
-    const audio = new Audio(audioUrl);
-    audio.crossOrigin = 'anonymous';
-    audio.playbackRate = 0.9;
-    currentAudio = audio;
-    audio.play().catch(() => {
-      fallbackSpeak(word);
-    });
-    audio.onended = () => {
-      if (currentAudio === audio) currentAudio = null;
-    };
-    audio.onerror = () => {
-      fallbackSpeak(word);
-    };
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+    fallbackToAudio(word);
     return;
   }
 
-  fallbackSpeak(word);
-}
-
-function fallbackSpeak(word: string) {
-  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
   try {
     const u = new SpeechSynthesisUtterance(word);
     u.lang = 'en-US';
-    u.rate = 0.7;
-    u.pitch = 1.3;
+    u.rate = 0.65;
+    u.pitch = 1.1;
     u.volume = 1;
 
     const voices = window.speechSynthesis.getVoices();
-    const enVoice = voices.find((v) => v.lang === 'en-US' && v.localService) ||
+    const enVoice = voices.find((v) => v.lang === 'en-US' && v.name.includes('Google')) ||
+                   voices.find((v) => v.lang === 'en-US' && v.localService) ||
                    voices.find((v) => v.lang.startsWith('en-US')) ||
                    voices.find((v) => v.lang.startsWith('en'));
     if (enVoice) {
@@ -204,8 +174,30 @@ function fallbackSpeak(word: string) {
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(u);
   } catch {
-    // ignore
+    fallbackToAudio(word);
   }
+}
+
+function fallbackToAudio(word: string) {
+  if (!word) return;
+  let currentAudio: HTMLAudioElement | null = null;
+  
+  const fileName = word.trim().toLowerCase().replace(/\s+/g, '-');
+  const audioUrl = `${BASE_URL}words/${fileName}.mp3`;
+  
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+  }
+  const audio = new Audio(audioUrl);
+  audio.crossOrigin = 'anonymous';
+  audio.playbackRate = 0.85;
+  audio.volume = 1;
+  currentAudio = audio;
+  audio.play().catch(() => {});
+  audio.onended = () => {
+    if (currentAudio === audio) currentAudio = null;
+  };
 }
 
 export function speakSequence(texts: { text: string; delay: number }[]): () => void {
@@ -217,12 +209,13 @@ export function speakSequence(texts: { text: string; delay: number }[]): () => v
     const item = texts[currentIndex];
     const u = new SpeechSynthesisUtterance(item.text);
     u.lang = 'en-US';
-    u.rate = 0.7;
-    u.pitch = 1.2;
+    u.rate = 0.65;
+    u.pitch = 1.1;
     u.volume = 1;
 
     const voices = window.speechSynthesis.getVoices();
-    const enVoice = voices.find((v) => v.lang === 'en-US' && v.localService) ||
+    const enVoice = voices.find((v) => v.lang === 'en-US' && v.name.includes('Google')) ||
+                   voices.find((v) => v.lang === 'en-US' && v.localService) ||
                    voices.find((v) => v.lang.startsWith('en-US')) ||
                    voices.find((v) => v.lang.startsWith('en'));
     if (enVoice) {
@@ -232,13 +225,13 @@ export function speakSequence(texts: { text: string; delay: number }[]): () => v
     u.onend = () => {
       currentIndex++;
       if (currentIndex < texts.length && !cancelled) {
-        window.setTimeout(playNext, item.delay || 200);
+        window.setTimeout(playNext, item.delay || 1000);
       }
     };
     u.onerror = () => {
       currentIndex++;
       if (currentIndex < texts.length && !cancelled) {
-        window.setTimeout(playNext, item.delay || 200);
+        window.setTimeout(playNext, item.delay || 1000);
       }
     };
 
@@ -260,10 +253,6 @@ export function speakSequence(texts: { text: string; delay: number }[]): () => v
 }
 
 export function stopSpeak() {
-  if (currentAudio) {
-    currentAudio.pause();
-    currentAudio = null;
-  }
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     try {
       window.speechSynthesis.cancel();

@@ -19,9 +19,9 @@ const colors = [
 
 const shapes = [
   { name: 'Circle', nameCn: '圆形', emoji: '🔴', color: '#EF4444' },
-  { name: 'Square', nameCn: '正方形', emoji: '🟦', color: '#3B82F6' },
+  { name: 'Square', nameCn: '正方形', emoji: '⬜', color: '#6B7280' },
   { name: 'Triangle', nameCn: '三角形', emoji: '🔺', color: '#FBBF24' },
-  { name: 'Rectangle', nameCn: '长方形', emoji: '⬜', color: '#6B7280' },
+  { name: 'Rectangle', nameCn: '长方形', emoji: '⬛', color: '#1F2937' },
   { name: 'Star', nameCn: '星形', emoji: '⭐', color: '#F59E0B' },
   { name: 'Heart', nameCn: '心形', emoji: '❤️', color: '#EF4444' },
   { name: 'Diamond', nameCn: '菱形', emoji: '💎', color: '#8B5CF6' },

@@ -195,7 +195,36 @@ export default function SongPlayer() {
   const progress = duration > 0 ? (elapsed / duration) * 100 : 0;
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-gradient-to-b from-[#F0F4FF] to-[#E5E7EB]">
+    <div className="relative flex min-h-screen flex-col bg-gradient-to-b from-[#F0F4FF] via-[#E0F2FE] to-[#FCE7F3] overflow-hidden">
+      {playing && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(20)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute rounded-full"
+              style={{
+                width: 10 + Math.random() * 20,
+                height: 10 + Math.random() * 20,
+                backgroundColor: song.color,
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+              }}
+              animate={{
+                y: [0, -100 - Math.random() * 100],
+                x: [0, (Math.random() - 0.5) * 50],
+                opacity: [0, 0.4, 0],
+                scale: [0.5, 1, 0.5],
+              }}
+              transition={{
+                duration: 3 + Math.random() * 2,
+                repeat: Infinity,
+                delay: i * 0.3,
+              }}
+            />
+          ))}
+        </div>
+      )}
+
       {song.audioUrl && (
         <audio
           ref={audioRef}
@@ -207,7 +236,7 @@ export default function SongPlayer() {
         />
       )}
 
-      <header className="flex items-center px-4 py-3">
+      <header className="relative z-10 flex items-center px-4 py-3 bg-white/70 backdrop-blur-md">
         <button
           onClick={() => {
             if (audioRef.current) {
@@ -216,14 +245,14 @@ export default function SongPlayer() {
             playingRef.current = false;
             navigate('/songs');
           }}
-          className="p-1"
+          className="p-2 rounded-full bg-white/80 shadow-sm"
         >
           <ChevronLeft size={24} className="text-[#1A1A2E]" />
         </button>
         <h1 className="flex-1 truncate text-center text-lg font-bold text-[#1A1A2E]">
           {song.title}
         </h1>
-        <button onClick={() => setMuted(!muted)} className="p-1">
+        <button onClick={() => setMuted(!muted)} className="p-2 rounded-full bg-white/80 shadow-sm">
           {muted ? (
             <VolumeX size={20} className="text-[#6B7280]" />
           ) : (
@@ -232,56 +261,90 @@ export default function SongPlayer() {
         </button>
       </header>
 
-      <div className="flex flex-1 flex-col items-center px-6 pt-4">
+      <div className="relative z-10 flex flex-1 flex-col items-center px-6 pt-6">
         <div className="relative">
           <motion.div
             animate={playing ? { rotate: 360 } : { rotate: 0 }}
-            transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
-            className="h-[180px] w-[180px] overflow-hidden rounded-full shadow-2xl flex items-center justify-center text-7xl"
-            style={{ background: `linear-gradient(135deg, ${song.color}44, ${song.color}88)` }}
+            transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
+            className="h-[200px] w-[200px] overflow-hidden rounded-full shadow-2xl flex items-center justify-center text-8xl ring-4 ring-white/50"
+            style={{ background: `linear-gradient(135deg, ${song.color}33, ${song.color}99)` }}
           >
             {song.emoji}
           </motion.div>
+          
+          {playing && (
+            <motion.div
+              className="absolute inset-0 rounded-full"
+              style={{ border: `3px solid ${song.color}` }}
+              animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+          )}
+          
           {playing &&
             [0, 1, 2, 3].map((i) => (
               <motion.div
                 key={i}
                 className="pointer-events-none absolute"
-                style={{ top: 20 + i * 25, left: -25 + i * 35, color: song.color }}
-                animate={{ y: [-12, 12, -12], opacity: [0.3, 1, 0.3], rotate: [0, 15, -15, 0] }}
-                transition={{ duration: 3 + i, repeat: Infinity, delay: i * 0.4 }}
+                style={{ top: 20 + i * 30, left: -30 + i * 40, color: song.color }}
+                animate={{ 
+                  y: [-15, 15, -15], 
+                  opacity: [0.3, 1, 0.3], 
+                  rotate: [0, 20, -20, 0],
+                  scale: [1, 1.2, 1]
+                }}
+                transition={{ duration: 2 + i * 0.3, repeat: Infinity, delay: i * 0.3 }}
               >
-                <Music size={18 + i * 4} />
+                <Music size={20 + i * 5} />
               </motion.div>
             ))}
         </div>
 
-        <h2 className="mt-5 text-xl font-extrabold text-[#1A1A2E]">{song.title}</h2>
-        <p className="text-sm text-[#6B7280]">{song.titleCn}</p>
+        <motion.div
+          animate={playing ? { y: [-5, 5, -5] } : {}}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="mt-6 text-center"
+        >
+          <h2 className="text-2xl font-black text-[#1A1A2E]">{song.title}</h2>
+          <p className="text-sm text-[#6B7280] mt-1">{song.titleCn}</p>
+        </motion.div>
 
-        <div className="mt-2 flex items-center gap-2">
-          <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ backgroundColor: `${song.color}22`, color: song.color }}>
+        <div className="mt-3 flex items-center gap-2">
+          <span className="text-xs px-3 py-1 rounded-full font-bold" style={{ backgroundColor: `${song.color}22`, color: song.color }}>
             {song.category}
+          </span>
+          <span className="text-xs px-3 py-1 rounded-full font-bold bg-white/80 text-[#6B7280]">
+            {formatTime(duration)}
           </span>
         </div>
 
         <div
           ref={lyricsRef}
-          className="mt-4 max-h-48 w-full space-y-2 overflow-y-auto scroll-smooth no-scrollbar"
+          className="mt-6 max-h-56 w-full space-y-3 overflow-y-auto scroll-smooth no-scrollbar"
         >
           {song.lyrics.map((line, i) => (
-            <p
+            <motion.p
               key={i}
               data-active={i === currentLyric}
-              className={`py-1 text-center text-sm transition-all duration-300 ${
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ 
+                opacity: i === currentLyric ? 1 : 0.6, 
+                y: 0,
+                scale: i === currentLyric ? 1.1 : 1,
+              }}
+              transition={{ duration: 0.3 }}
+              className={`py-2 px-4 rounded-xl text-center text-sm transition-all duration-300 ${
                 i === currentLyric
-                  ? 'text-base font-bold scale-105'
-                  : 'text-[#6B7280] opacity-70'
+                  ? 'font-black'
+                  : 'font-normal'
               }`}
-              style={{ color: i === currentLyric ? song.color : undefined }}
+              style={{ 
+                color: i === currentLyric ? song.color : '#6B7280',
+                backgroundColor: i === currentLyric ? `${song.color}11` : 'transparent',
+              }}
             >
               {line.text}
-            </p>
+            </motion.p>
           ))}
         </div>
       </div>
