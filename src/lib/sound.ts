@@ -144,40 +144,26 @@ export function playPop() {
   playToneImmediate({ freq: 900, duration: 0.05, type: 'sine', volume: 0.12, delay: 0.03 });
 }
 
-// ==================== Word Pronunciation (Web Speech API) ====================
+// ==================== Word Pronunciation (MP3 Audio) ====================
 //
 // 音色版本配置：
 // ┌─────────────────────────────────────────────────────────────────────────────┐
 // │ 版本 1: rate=0.65, pitch=1.1, 优先 Google 语音                     │
 // │ 版本 2: rate=0.75, pitch=1.3, 优先 Microsoft/Samantha 童趣语音      │
-// │ 版本 3 (当前): 优先使用 MP3 音频文件，更自然柔和，Web Speech API 作为备选    │
+// │ 版本 3: 优先使用 MP3 音频文件，Web Speech API 作为备选                │
+// │ 版本 4 (当前): 全部使用有道词典美式女声 MP3 音频，音色统一自然          │
 // └─────────────────────────────────────────────────────────────────────────────┘
 
 // 当前使用的音色版本
-const VOICE_VERSION = 3;
+// 版本 4: 全部使用有道词典美式女声 MP3 音频，音色统一自然
+const VOICE_VERSION = 4;
 
-// 版本 1 配置
-const VOICE_CONFIG_V1 = {
-  rate: 0.65,
-  pitch: 1.1,
-  volume: 1,
-};
-
-// 版本 2 配置
-const VOICE_CONFIG_V2 = {
-  rate: 0.75,
-  pitch: 1.3,
-  volume: 1,
-};
-
-// 版本 3 配置 (当前使用) - 更自然柔和
-const VOICE_CONFIG_V3 = {
-  rate: 0.85,
+// 版本配置 - 版本 4 使用有道美式女声 MP3，不需要 TTS 配置
+const VOICE_CONFIG = {
+  rate: 1.0,
   pitch: 1.0,
   volume: 1,
 };
-
-const VOICE_CONFIG = VOICE_CONFIG_V3;
 
 // MP3 音频播放器（优先使用，音色更自然）
 let currentAudio: HTMLAudioElement | null = null;
@@ -222,20 +208,19 @@ export function speakWord(word: string) {
 
   const audioUrl = getWordAudioUrl(word);
 
-  // 版本 3: 优先尝试 MP3 音频文件（音色更自然）
-  if (VOICE_VERSION === 3 && audioUrl) {
+  // 版本 4: 全部使用有道美式女声 MP3 音频
+  if (VOICE_VERSION >= 3 && audioUrl) {
     if (currentAudio) {
       currentAudio.pause();
       currentAudio = null;
     }
     const audio = new Audio(audioUrl);
     audio.crossOrigin = 'anonymous';
-    audio.playbackRate = 0.9;  // 稍慢一点，让小朋友听清楚
+    audio.playbackRate = VOICE_VERSION === 4 ? 1.0 : 0.9;
     audio.volume = 1;
     currentAudio = audio;
     
     audio.play().catch(() => {
-      // MP3 播放失败，回退到 Web Speech API
       speakWithTTS(word);
     });
     
@@ -244,14 +229,12 @@ export function speakWord(word: string) {
     };
     
     audio.onerror = () => {
-      // MP3 加载失败，回退到 Web Speech API
       speakWithTTS(word);
     };
     
     return;
   }
 
-  // 其他版本直接使用 Web Speech API
   speakWithTTS(word);
 }
 
@@ -286,12 +269,12 @@ export function speakSequence(texts: { text: string; delay: number }[]): () => v
     if (cancelled || currentIndex >= texts.length) return;
     const item = texts[currentIndex];
 
-    // 版本 3: 优先尝试 MP3
-    if (VOICE_VERSION === 3) {
+    // 版本 3/4: 优先尝试 MP3 音频文件（有道美式女声）
+    if (VOICE_VERSION >= 3) {
       const audioUrl = getWordAudioUrl(item.text);
       const audio = new Audio(audioUrl);
       audio.crossOrigin = 'anonymous';
-      audio.playbackRate = 0.9;
+      audio.playbackRate = VOICE_VERSION === 4 ? 1.0 : 0.9;
       audio.volume = 1;
 
       audio.onended = () => {
@@ -302,7 +285,6 @@ export function speakSequence(texts: { text: string; delay: number }[]): () => v
       };
 
       audio.onerror = () => {
-        // MP3 失败，用 TTS
         playNextWithTTS(item.text, item.delay);
       };
 
@@ -312,7 +294,6 @@ export function speakSequence(texts: { text: string; delay: number }[]): () => v
       return;
     }
 
-    // 其他版本使用 TTS
     playNextWithTTS(item.text, item.delay);
   }
 

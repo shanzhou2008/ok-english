@@ -1,6 +1,7 @@
 import os
 import requests
 
+# 有道词典 API - type=2 为美式女声发音
 BASE_URL = "https://dict.youdao.com/dictvoice?audio={}&type=2"
 OUTPUT_DIR = "../public/words"
 
@@ -24,11 +25,16 @@ words_to_download = [
     # 动物世界
     'Cat', 'Dog', 'Bird', 'Fish', 'Rabbit', 'Bear', 'Elephant', 'Lion', 'Monkey',
     'Panda', 'Tiger', 'Giraffe', 'Zebra', 'Dolphin', 'Whale', 'Butterfly', 'Frog', 'Snake',
+    # 日常用语
+    'Hello', 'Good morning', 'Thank you',
+    # 其他单词
+    'Book', 'Chair', 'House', 'Boat', 'Tree', 'Bus', 'Rocket', 'Car', 'Moon', 'Plane',
+    'Donut', 'Rainbow', 'Hamburger', 'Cake', 'Pizza', 'Banana', 'Strawberry', 'Flower',
 ]
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-print(f"准备下载 {len(words_to_download)} 个音频文件...")
+print(f"准备下载 {len(words_to_download)} 个音频文件 (有道美式女声)...")
 
 success_count = 0
 fail_count = 0
@@ -36,11 +42,6 @@ fail_count = 0
 for word in words_to_download:
     file_name = word.lower().replace(' ', '-') + '.mp3'
     file_path = os.path.join(OUTPUT_DIR, file_name)
-    
-    if os.path.exists(file_path):
-        print(f"✓ 已存在: {word} -> {file_name}")
-        success_count += 1
-        continue
     
     try:
         url = BASE_URL.format(word)
